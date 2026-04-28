@@ -92,6 +92,52 @@ jobs:
           echo "PID=$ACTUAL_PID RSS=${RSS} KB ($(awk "BEGIN{printf \"%.1f\",$RSS/1024}") MB)"
           echo "rss=${RSS}" >> "$GITHUB_OUTPUT"
 
+  measure-java-native:
+    name: Measure Java (Native)
+    runs-on: ubuntu-latest
+    outputs:
+      rss: ${{ steps.measure.outputs.rss }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '25'
+          distribution: 'graalvm-community'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build native image
+        run: cd java && javac Server.java && native-image --no-fallback -cp . Server
+      - name: Start server
+        run: java/Server &
+      - name: Wait for ready
+        run: |
+          for i in $(seq 1 15); do
+            if curl -sf http://localhost:8080/ > /dev/null 2>&1; then
+              echo "✓ Server is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "✗ Server did not respond in time"
+          exit 1
+      - name: Warmup
+        run: |
+          for i in $(seq 1 5); do
+            curl -sf http://localhost:8080/ > /dev/null
+          done
+      - name: Measure RSS
+        id: measure
+        run: |
+          ACTUAL_PID=$(ss -tlnp 'sport = :8080' 2>/dev/null \
+            | grep -oP 'pid=\K[0-9]+' \
+            | head -1)
+          if [ -z "$ACTUAL_PID" ]; then
+            echo "ERROR: could not find PID for port 8080" >&2
+            exit 1
+          fi
+          RSS=$(ps -o rss= -p "$ACTUAL_PID")
+          echo "PID=$ACTUAL_PID RSS=${RSS} KB ($(awk "BEGIN{printf \"%.1f\",$RSS/1024}") MB)"
+          echo "rss=${RSS}" >> "$GITHUB_OUTPUT"
+
   measure-nodejs:
     name: Measure Node.js
     runs-on: ubuntu-latest
@@ -104,6 +150,48 @@ jobs:
           node-version: '24'
       - name: Start server
         run: cd nodejs && node server.js &
+      - name: Wait for ready
+        run: |
+          for i in $(seq 1 15); do
+            if curl -sf http://localhost:8080/ > /dev/null 2>&1; then
+              echo "✓ Server is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "✗ Server did not respond in time"
+          exit 1
+      - name: Warmup
+        run: |
+          for i in $(seq 1 5); do
+            curl -sf http://localhost:8080/ > /dev/null
+          done
+      - name: Measure RSS
+        id: measure
+        run: |
+          ACTUAL_PID=$(ss -tlnp 'sport = :8080' 2>/dev/null \
+            | grep -oP 'pid=\K[0-9]+' \
+            | head -1)
+          if [ -z "$ACTUAL_PID" ]; then
+            echo "ERROR: could not find PID for port 8080" >&2
+            exit 1
+          fi
+          RSS=$(ps -o rss= -p "$ACTUAL_PID")
+          echo "PID=$ACTUAL_PID RSS=${RSS} KB ($(awk "BEGIN{printf \"%.1f\",$RSS/1024}") MB)"
+          echo "rss=${RSS}" >> "$GITHUB_OUTPUT"
+
+  measure-nodejs-bun:
+    name: Measure Node.js (Bun)
+    runs-on: ubuntu-latest
+    outputs:
+      rss: ${{ steps.measure.outputs.rss }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Start server
+        run: cd nodejs && bun --smol server.js &
       - name: Wait for ready
         run: |
           for i in $(seq 1 15); do
@@ -176,17 +264,64 @@ jobs:
           echo "PID=$ACTUAL_PID RSS=${RSS} KB ($(awk "BEGIN{printf \"%.1f\",$RSS/1024}") MB)"
           echo "rss=${RSS}" >> "$GITHUB_OUTPUT"
 
+  measure-dotnet-aot:
+    name: Measure .NET (AOT)
+    runs-on: ubuntu-latest
+    outputs:
+      rss: ${{ steps.measure.outputs.rss }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Publish (Native AOT)
+        run: cd dotnet && dotnet publish -r linux-x64 -c Release
+      - name: Start server
+        run: dotnet/bin/Release/net10.0/linux-x64/publish/server &
+      - name: Wait for ready
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8080/ > /dev/null 2>&1; then
+              echo "✓ Server is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "✗ Server did not respond in time"
+          exit 1
+      - name: Warmup
+        run: |
+          for i in $(seq 1 5); do
+            curl -sf http://localhost:8080/ > /dev/null
+          done
+      - name: Measure RSS
+        id: measure
+        run: |
+          ACTUAL_PID=$(ss -tlnp 'sport = :8080' 2>/dev/null \
+            | grep -oP 'pid=\K[0-9]+' \
+            | head -1)
+          if [ -z "$ACTUAL_PID" ]; then
+            echo "ERROR: could not find PID for port 8080" >&2
+            exit 1
+          fi
+          RSS=$(ps -o rss= -p "$ACTUAL_PID")
+          echo "PID=$ACTUAL_PID RSS=${RSS} KB ($(awk "BEGIN{printf \"%.1f\",$RSS/1024}") MB)"
+          echo "rss=${RSS}" >> "$GITHUB_OUTPUT"
+
   report:
     name: Memory Report
     runs-on: ubuntu-latest
-    needs: [measure-go, measure-java, measure-nodejs, measure-dotnet]
+    needs: [measure-go, measure-java, measure-java-native, measure-nodejs, measure-nodejs-bun, measure-dotnet, measure-dotnet-aot]
     steps:
       - name: Write summary
         run: |
           GO_RSS="${{ needs.measure-go.outputs.rss }}"
           JAVA_RSS="${{ needs.measure-java.outputs.rss }}"
+          JAVA_NATIVE_RSS="${{ needs.measure-java-native.outputs.rss }}"
           NODE_RSS="${{ needs.measure-nodejs.outputs.rss }}"
+          NODE_BUN_RSS="${{ needs.measure-nodejs-bun.outputs.rss }}"
           DOTNET_RSS="${{ needs.measure-dotnet.outputs.rss }}"
+          DOTNET_AOT_RSS="${{ needs.measure-dotnet-aot.outputs.rss }}"
 
           {
             echo "## Memory Usage (RSS after startup + 5 warmup requests)"
@@ -198,14 +333,17 @@ jobs:
           {
             printf "go\t%s\n" "$GO_RSS"
             printf "java\t%s\n" "$JAVA_RSS"
+            printf "java-native\t%s\n" "$JAVA_NATIVE_RSS"
             printf "nodejs\t%s\n" "$NODE_RSS"
+            printf "nodejs-bun\t%s\n" "$NODE_BUN_RSS"
             printf "dotnet\t%s\n" "$DOTNET_RSS"
+            printf "dotnet-aot\t%s\n" "$DOTNET_AOT_RSS"
           } | sort -t$'\t' -k2 -n | awk -F'\t' '
             BEGIN { rank=1 }
             {
               lang=$1; kb=$2
               mb=kb/1024
-              name = (lang=="go")?"Go":(lang=="java")?"Java":(lang=="nodejs")?"Node.js":".NET"
+              name = (lang=="go")?"Go":(lang=="java")?"Java":(lang=="java-native")?"Java (Native)":(lang=="nodejs")?"Node.js":(lang=="nodejs-bun")?"Node.js (Bun)":(lang=="dotnet")?".NET":".NET (AOT)"
               printf "| %d | %s | %s | %.1f |\n", rank, name, kb, mb
               rank++
             }
