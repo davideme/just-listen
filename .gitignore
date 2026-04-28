@@ -1,0 +1,36 @@
+# ==========================================
+# just-listen root .gitignore
+# ==========================================
+
+# ---- Go ----
+go/server
+go/*.exe
+go/*.test
+go/vendor/
+
+# ---- Java ----
+java/*.class
+java/*.jar
+java/out/
+
+# ---- Node.js ----
+nodejs/node_modules/
+nodejs/npm-debug.log*
+nodejs/yarn-error.log
+
+# ---- .NET ----
+dotnet/bin/
+dotnet/obj/
+dotnet/*.user
+
+# ---- OS & Editor ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ---- Benchmarking output ----
+benchmarks/results/
