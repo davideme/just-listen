@@ -193,6 +193,9 @@ jobs:
             echo ""
             echo "| Rank | Language | RSS (KB) | RSS (MB) |"
             echo "|------|----------|----------|----------|"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          {
             printf "go\t%s\n" "$GO_RSS"
             printf "java\t%s\n" "$JAVA_RSS"
             printf "nodejs\t%s\n" "$NODE_RSS"
