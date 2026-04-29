@@ -107,7 +107,7 @@ jobs:
       - name: Build native image
         run: cd java && javac Server.java && native-image --no-fallback -cp . Server
       - name: Start server
-        run: java/Server &
+        run: java/server &
       - name: Wait for ready
         run: |
           for i in $(seq 1 15); do
