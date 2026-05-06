@@ -1,0 +1,9 @@
+{
+  "configProperties": {
+    "System.GC.Server": false,
+    "System.GC.Concurrent": true,
+    "System.GC.HeapHardLimit": 20971520,
+    "System.Threading.ThreadPool.MinThreads": 1,
+    "System.Threading.ThreadPool.MaxThreads": 4
+  }
+}
