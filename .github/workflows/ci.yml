@@ -70,7 +70,6 @@ jobs:
             --gc=serial \
             -R:MinHeapSize=1m \
             -R:MaxHeapSize=16m \
-            -H:+OptimizeForSize \
             -march=native \
             -cp . Server
       - name: Start server
