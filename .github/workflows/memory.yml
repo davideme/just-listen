@@ -105,7 +105,14 @@ jobs:
           distribution: 'graalvm-community'
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build native image
-        run: cd java && javac Server.java && native-image --no-fallback -cp . Server
+        run: |
+          cd java && javac Server.java && native-image \
+            --no-fallback \
+            --gc=serial \
+            -R:MinHeapSize=1m \
+            -R:MaxHeapSize=16m \
+            -march=native \
+            -cp . Server
       - name: Start server
         run: java/server &
       - name: Wait for ready

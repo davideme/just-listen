@@ -6,5 +6,9 @@
     <PublishAot>true</PublishAot>
     <InvariantGlobalization>true</InvariantGlobalization>
     <StripSymbols>true</StripSymbols>
+    <IlcOptimizationPreference>Size</IlcOptimizationPreference>
+    <EventSourceSupport>false</EventSourceSupport>
+    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
+    <MetricsSupport>false</MetricsSupport>
   </PropertyGroup>
 </Project>
