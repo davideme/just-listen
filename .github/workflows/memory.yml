@@ -113,7 +113,6 @@ jobs:
             -R:MaxHeapSize=8m \
             -R:MaxNewSize=2m \
             -march=native \
-            --enable-monitoring= \
             -H:+UnlockExperimentalVMOptions \
             -H:DeadlockWatchdogInterval=0 \
             -cp . Server
