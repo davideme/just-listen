@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       rss: ${{ steps.measure.outputs.rss }}
+      vmhwm: ${{ steps.measure.outputs.vmhwm }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
@@ -46,14 +47,18 @@ jobs:
             exit 1
           fi
           RSS=$(ps -o rss= -p "$ACTUAL_PID")
-          echo "PID=$ACTUAL_PID RSS=${RSS} KB ($(awk "BEGIN{printf \"%.1f\",$RSS/1024}") MB)"
-          echo "rss=${RSS}" >> "$GITHUB_OUTPUT"
+          VMRSS=$(grep -m1 '^VmRSS:' /proc/"$ACTUAL_PID"/status | awk '{print $2}')
+          VMHWM=$(grep -m1 '^VmHWM:' /proc/"$ACTUAL_PID"/status | awk '{print $2}')
+          echo "PID=$ACTUAL_PID  ps_rss=${RSS} KB  VmRSS=${VMRSS} KB  VmHWM=${VMHWM} KB"
+          echo "rss=${RSS}"      >> "$GITHUB_OUTPUT"
+          echo "vmhwm=${VMHWM}" >> "$GITHUB_OUTPUT"
 
   measure-java:
     name: Measure Java
     runs-on: ubuntu-latest
     outputs:
       rss: ${{ steps.measure.outputs.rss }}
+      vmhwm: ${{ steps.measure.outputs.vmhwm }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-java@v5
@@ -89,14 +94,18 @@ jobs:
             exit 1
           fi
           RSS=$(ps -o rss= -p "$ACTUAL_PID")
-          echo "PID=$ACTUAL_PID RSS=${RSS} KB ($(awk "BEGIN{printf \"%.1f\",$RSS/1024}") MB)"
-          echo "rss=${RSS}" >> "$GITHUB_OUTPUT"
+          VMRSS=$(grep -m1 '^VmRSS:' /proc/"$ACTUAL_PID"/status | awk '{print $2}')
+          VMHWM=$(grep -m1 '^VmHWM:' /proc/"$ACTUAL_PID"/status | awk '{print $2}')
+          echo "PID=$ACTUAL_PID  ps_rss=${RSS} KB  VmRSS=${VMRSS} KB  VmHWM=${VMHWM} KB"
+          echo "rss=${RSS}"      >> "$GITHUB_OUTPUT"
+          echo "vmhwm=${VMHWM}" >> "$GITHUB_OUTPUT"
 
   measure-java-native:
     name: Measure Java (Native)
     runs-on: ubuntu-latest
     outputs:
       rss: ${{ steps.measure.outputs.rss }}
+      vmhwm: ${{ steps.measure.outputs.vmhwm }}
     steps:
       - uses: actions/checkout@v6
       - uses: graalvm/setup-graalvm@v1
@@ -142,14 +151,18 @@ jobs:
             exit 1
           fi
           RSS=$(ps -o rss= -p "$ACTUAL_PID")
-          echo "PID=$ACTUAL_PID RSS=${RSS} KB ($(awk "BEGIN{printf \"%.1f\",$RSS/1024}") MB)"
-          echo "rss=${RSS}" >> "$GITHUB_OUTPUT"
+          VMRSS=$(grep -m1 '^VmRSS:' /proc/"$ACTUAL_PID"/status | awk '{print $2}')
+          VMHWM=$(grep -m1 '^VmHWM:' /proc/"$ACTUAL_PID"/status | awk '{print $2}')
+          echo "PID=$ACTUAL_PID  ps_rss=${RSS} KB  VmRSS=${VMRSS} KB  VmHWM=${VMHWM} KB"
+          echo "rss=${RSS}"      >> "$GITHUB_OUTPUT"
+          echo "vmhwm=${VMHWM}" >> "$GITHUB_OUTPUT"
 
   measure-nodejs:
     name: Measure Node.js
     runs-on: ubuntu-latest
     outputs:
       rss: ${{ steps.measure.outputs.rss }}
+      vmhwm: ${{ steps.measure.outputs.vmhwm }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -184,14 +197,18 @@ jobs:
             exit 1
           fi
           RSS=$(ps -o rss= -p "$ACTUAL_PID")
-          echo "PID=$ACTUAL_PID RSS=${RSS} KB ($(awk "BEGIN{printf \"%.1f\",$RSS/1024}") MB)"
-          echo "rss=${RSS}" >> "$GITHUB_OUTPUT"
+          VMRSS=$(grep -m1 '^VmRSS:' /proc/"$ACTUAL_PID"/status | awk '{print $2}')
+          VMHWM=$(grep -m1 '^VmHWM:' /proc/"$ACTUAL_PID"/status | awk '{print $2}')
+          echo "PID=$ACTUAL_PID  ps_rss=${RSS} KB  VmRSS=${VMRSS} KB  VmHWM=${VMHWM} KB"
+          echo "rss=${RSS}"      >> "$GITHUB_OUTPUT"
+          echo "vmhwm=${VMHWM}" >> "$GITHUB_OUTPUT"
 
   measure-nodejs-bun:
     name: Measure Node.js (Bun)
     runs-on: ubuntu-latest
     outputs:
       rss: ${{ steps.measure.outputs.rss }}
+      vmhwm: ${{ steps.measure.outputs.vmhwm }}
     steps:
       - uses: actions/checkout@v6
       - uses: oven-sh/setup-bun@v2
@@ -226,14 +243,18 @@ jobs:
             exit 1
           fi
           RSS=$(ps -o rss= -p "$ACTUAL_PID")
-          echo "PID=$ACTUAL_PID RSS=${RSS} KB ($(awk "BEGIN{printf \"%.1f\",$RSS/1024}") MB)"
-          echo "rss=${RSS}" >> "$GITHUB_OUTPUT"
+          VMRSS=$(grep -m1 '^VmRSS:' /proc/"$ACTUAL_PID"/status | awk '{print $2}')
+          VMHWM=$(grep -m1 '^VmHWM:' /proc/"$ACTUAL_PID"/status | awk '{print $2}')
+          echo "PID=$ACTUAL_PID  ps_rss=${RSS} KB  VmRSS=${VMRSS} KB  VmHWM=${VMHWM} KB"
+          echo "rss=${RSS}"      >> "$GITHUB_OUTPUT"
+          echo "vmhwm=${VMHWM}" >> "$GITHUB_OUTPUT"
 
   measure-dotnet:
     name: Measure .NET
     runs-on: ubuntu-latest
     outputs:
       rss: ${{ steps.measure.outputs.rss }}
+      vmhwm: ${{ steps.measure.outputs.vmhwm }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v5
@@ -268,14 +289,18 @@ jobs:
             exit 1
           fi
           RSS=$(ps -o rss= -p "$ACTUAL_PID")
-          echo "PID=$ACTUAL_PID RSS=${RSS} KB ($(awk "BEGIN{printf \"%.1f\",$RSS/1024}") MB)"
-          echo "rss=${RSS}" >> "$GITHUB_OUTPUT"
+          VMRSS=$(grep -m1 '^VmRSS:' /proc/"$ACTUAL_PID"/status | awk '{print $2}')
+          VMHWM=$(grep -m1 '^VmHWM:' /proc/"$ACTUAL_PID"/status | awk '{print $2}')
+          echo "PID=$ACTUAL_PID  ps_rss=${RSS} KB  VmRSS=${VMRSS} KB  VmHWM=${VMHWM} KB"
+          echo "rss=${RSS}"      >> "$GITHUB_OUTPUT"
+          echo "vmhwm=${VMHWM}" >> "$GITHUB_OUTPUT"
 
   measure-dotnet-aot:
     name: Measure .NET (AOT)
     runs-on: ubuntu-latest
     outputs:
       rss: ${{ steps.measure.outputs.rss }}
+      vmhwm: ${{ steps.measure.outputs.vmhwm }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v5
@@ -312,8 +337,11 @@ jobs:
             exit 1
           fi
           RSS=$(ps -o rss= -p "$ACTUAL_PID")
-          echo "PID=$ACTUAL_PID RSS=${RSS} KB ($(awk "BEGIN{printf \"%.1f\",$RSS/1024}") MB)"
-          echo "rss=${RSS}" >> "$GITHUB_OUTPUT"
+          VMRSS=$(grep -m1 '^VmRSS:' /proc/"$ACTUAL_PID"/status | awk '{print $2}')
+          VMHWM=$(grep -m1 '^VmHWM:' /proc/"$ACTUAL_PID"/status | awk '{print $2}')
+          echo "PID=$ACTUAL_PID  ps_rss=${RSS} KB  VmRSS=${VMRSS} KB  VmHWM=${VMHWM} KB"
+          echo "rss=${RSS}"      >> "$GITHUB_OUTPUT"
+          echo "vmhwm=${VMHWM}" >> "$GITHUB_OUTPUT"
 
   report:
     name: Memory Report
@@ -323,40 +351,47 @@ jobs:
       - name: Write summary
         run: |
           GO_RSS="${{ needs.measure-go.outputs.rss }}"
+          GO_HWM="${{ needs.measure-go.outputs.vmhwm }}"
           JAVA_RSS="${{ needs.measure-java.outputs.rss }}"
+          JAVA_HWM="${{ needs.measure-java.outputs.vmhwm }}"
           JAVA_NATIVE_RSS="${{ needs.measure-java-native.outputs.rss }}"
+          JAVA_NATIVE_HWM="${{ needs.measure-java-native.outputs.vmhwm }}"
           NODE_RSS="${{ needs.measure-nodejs.outputs.rss }}"
+          NODE_HWM="${{ needs.measure-nodejs.outputs.vmhwm }}"
           NODE_BUN_RSS="${{ needs.measure-nodejs-bun.outputs.rss }}"
+          NODE_BUN_HWM="${{ needs.measure-nodejs-bun.outputs.vmhwm }}"
           DOTNET_RSS="${{ needs.measure-dotnet.outputs.rss }}"
+          DOTNET_HWM="${{ needs.measure-dotnet.outputs.vmhwm }}"
           DOTNET_AOT_RSS="${{ needs.measure-dotnet-aot.outputs.rss }}"
+          DOTNET_AOT_HWM="${{ needs.measure-dotnet-aot.outputs.vmhwm }}"
 
           {
             echo "## Memory Usage (RSS after startup + 5 warmup requests)"
             echo ""
-            echo "| Rank | Language | RSS (KB) | RSS (MB) |"
-            echo "|------|----------|----------|----------|"
+            echo "| Rank | Language | RSS (KB) | RSS (MB) | Peak VmHWM (KB) |"
+            echo "|------|----------|----------|----------|-----------------|"
           } >> "$GITHUB_STEP_SUMMARY"
 
           {
-            printf "go\t%s\n" "$GO_RSS"
-            printf "java\t%s\n" "$JAVA_RSS"
-            printf "java-native\t%s\n" "$JAVA_NATIVE_RSS"
-            printf "nodejs\t%s\n" "$NODE_RSS"
-            printf "nodejs-bun\t%s\n" "$NODE_BUN_RSS"
-            printf "dotnet\t%s\n" "$DOTNET_RSS"
-            printf "dotnet-aot\t%s\n" "$DOTNET_AOT_RSS"
+            printf "go\t%s\t%s\n"           "$GO_RSS"          "$GO_HWM"
+            printf "java\t%s\t%s\n"         "$JAVA_RSS"        "$JAVA_HWM"
+            printf "java-native\t%s\t%s\n"  "$JAVA_NATIVE_RSS" "$JAVA_NATIVE_HWM"
+            printf "nodejs\t%s\t%s\n"       "$NODE_RSS"        "$NODE_HWM"
+            printf "nodejs-bun\t%s\t%s\n"   "$NODE_BUN_RSS"    "$NODE_BUN_HWM"
+            printf "dotnet\t%s\t%s\n"       "$DOTNET_RSS"      "$DOTNET_HWM"
+            printf "dotnet-aot\t%s\t%s\n"   "$DOTNET_AOT_RSS"  "$DOTNET_AOT_HWM"
           } | sort -t$'\t' -k2 -n | awk -F'\t' '
             BEGIN { rank=1 }
             {
-              lang=$1; kb=$2
+              lang=$1; kb=$2; hwm=$3
               mb=kb/1024
               name = (lang=="go")?"Go":(lang=="java")?"Java":(lang=="java-native")?"Java (Native)":(lang=="nodejs")?"Node.js":(lang=="nodejs-bun")?"Node.js (Bun)":(lang=="dotnet")?".NET":".NET (AOT)"
-              printf "| %d | %s | %s | %.1f |\n", rank, name, kb, mb
+              printf "| %d | %s | %s | %.1f | %s |\n", rank, name, kb, mb, hwm
               rank++
             }
           ' >> "$GITHUB_STEP_SUMMARY"
 
           {
             echo ""
-            echo "> Measured with \`ps -o rss=\` on \`ubuntu-latest\`. Commit: \`${{ github.sha }}\`"
+            echo "> RSS measured with \`ps -o rss=\` (cross-checked against \`VmRSS\` from \`/proc/[pid]/status\`). Peak via \`VmHWM\`. Runs on \`ubuntu-latest\`. Commit: \`${{ github.sha }}\`"
           } >> "$GITHUB_STEP_SUMMARY"
