@@ -133,6 +133,29 @@ jobs:
           echo "✗ Server did not respond in time"
           exit 1
 
+  nodejs-bun-canary:
+    name: Node.js (Bun Canary)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: canary
+      - name: Start server
+        run: cd nodejs && bun --smol server.js &
+      - name: Verify HTTP 200
+        run: |
+          for i in $(seq 1 15); do
+            if curl -sf http://localhost:8080/ > /dev/null 2>&1; then
+              echo "✓ Server is up"
+              curl -si http://localhost:8080/ | head -1
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "✗ Server did not respond in time"
+          exit 1
+
   dotnet:
     name: .NET
     runs-on: ubuntu-latest
