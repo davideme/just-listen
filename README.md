@@ -115,6 +115,8 @@ app.Run("http://0.0.0.0:8080");
 | Go | 1.26 | 5 | `go run main.go` | `net/http` | Goroutines |
 | Java | 25 | 8 | `java Server.java` | `com.sun.net.httpserver` | Virtual threads |
 | Node.js | 24 | 2 | `node server.js` | `node:http` | Event loop |
+| Node.js (Bun) | latest | 2 | `bun server.js` | `node:http` | Event loop |
+| Node.js (Bun Canary) | canary | 2 | `bun server.js` | `node:http` | Event loop |
 | .NET | 10 | 3 | `dotnet run` | Kestrel (`Sdk.Web`) | Thread pool / async |
 
 ## Why not Python, Ruby, or PHP?
