@@ -68,9 +68,12 @@ jobs:
           cd java && javac Server.java && native-image \
             --no-fallback \
             --gc=serial \
-            -R:MinHeapSize=1m \
-            -R:MaxHeapSize=16m \
+            -R:MinHeapSize=512k \
+            -R:MaxHeapSize=8m \
+            -R:MaxNewSize=2m \
             -march=native \
+            -H:+UnlockExperimentalVMOptions \
+            -H:DeadlockWatchdogInterval=0 \
             -cp . Server
       - name: Start server
         run: java/server &
